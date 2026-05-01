@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Semua Proyek — S.R</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/index2.css">
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <div class="nav-overlay" id="navOverlay"></div>
+  <nav>
+    <a href="index2.html" class="nav-logo">S.R<em style="font-style:normal;color:var(--gold)">.</em></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index2.html">Home</a></li>
+      <li><a href="index2.html#about">Tentang</a></li>
+      <li><a href="index2.html#skills">Keahlian</a></li>
+      <li><a href="index2.html#projects">Proyek</a></li>
+      <li><a href="index2.html#contact">Kontak</a></li>
+    </ul>
+  </nav>
+
+  <section class="page-header">
+    <a href="index2.html#projects" class="back-link">&larr; Kembali ke Beranda</a>
+    <p class="section-number">03 — Proyek</p>
+    <h1 class="section-title">Semua<br/><em>Proyek</em></h1>
+    <p class="page-header-sub">Kumpulan proyek yang telah saya kerjakan.</p>
+  </section>
+
+  <section class="projects-page">
+    <div class="platform-filter" id="platformFilter">
+      <p class="platform-filter-label">Platform</p>
+      <div class="platform-filter-btns">
+        <button class="platform-btn active" data-platform="all">Semua</button>
+        <button class="platform-btn" data-platform="Android">Android</button>
+        <button class="platform-btn" data-platform="iOS">iOS</button>
+        <button class="platform-btn" data-platform="Web">Web</button>
+      </div>
+    </div>
+    <div class="projects-page-grid" id="projectsGrid"></div>
+    <p class="projects-empty" id="projectsEmpty" style="display:none;">Tidak ada proyek untuk platform yang dipilih.</p>
+  </section>
+
+  <footer>
+    <p class="footer-copy">&copy; 2026 Supriyandi Ridzkia. All rights reserved.</p>
+    <p class="footer-made">Dirancang &amp; dibangun dengan <span>&hearts;</span> di Semesta ini</p>
+  </footer>
+
+  <script src="assets/js/projects.js"></script>
+  <script src="assets/js/index2.js"></script>
+  <script>
+    var grid = document.getElementById('projectsGrid');
+    var emptyMsg = document.getElementById('projectsEmpty');
+    var selectedPlatforms = [];
+
+    function createCard(p) {
+      var card = document.createElement('a');
+      card.href = 'project-detail.html?id=' + p.id;
+      card.className = 'project-card reveal';
+      card.setAttribute('data-platforms', p.platform.join(','));
+
+      var platformBadges = '';
+      if (p.platform && p.platform.length) {
+        platformBadges = '<div class="project-platforms">' +
+          p.platform.map(function(pl) { return '<span class="platform-pill">' + pl + '</span>'; }).join('') +
+        '</div>';
+      }
+
+      var thumbsContainer = document.createElement('div');
+      thumbsContainer.className = 'project-thumbs';
+      thumbsContainer.style.marginTop = '1.5rem';
+
+      // Dynamically probe images 1-5
+      (function probeThumb(n) {
+        if (n > 6) return;
+        var img = new Image();
+        img.onload = function() {
+          var thumb = document.createElement('div');
+          thumb.className = 'project-thumb';
+          var imgEl = document.createElement('img');
+          imgEl.className = 'pv-svg';
+          imgEl.src = img.src;
+          imgEl.alt = p.title + ' screenshot ' + n;
+          imgEl.loading = 'lazy';
+          thumb.appendChild(imgEl);
+          thumbsContainer.appendChild(thumb);
+          probeThumb(n + 1);
+        };
+        img.onerror = function() { /* image doesn't exist, stop */ };
+        img.src = 'assets/img/proyek/' + p.id + '/' + n + '.png';
+      })(1);
+
+      card.innerHTML =
+        '<p class="project-num">' + p.num + '</p>' +
+        '<h3 class="project-title">' + p.title + '</h3>' +
+        '<p class="project-desc">' + p.desc + '</p>' +
+        platformBadges +
+        '<div class="project-stack">' +
+          p.stack.map(function(s) { return '<span class="stack-pill">' + s + '</span>'; }).join('') +
+        '</div>';
+      card.appendChild(thumbsContainer);
+      return card;
+    }
+
+    function renderProjects() {
+      grid.innerHTML = '';
+      var filtered = projects.filter(function(p) {
+        if (selectedPlatforms.length === 0) return true;
+        return p.platform.some(function(pl) {
+          return selectedPlatforms.indexOf(pl) !== -1;
+        });
+      });
+
+      if (filtered.length === 0) {
+        emptyMsg.style.display = '';
+      } else {
+        emptyMsg.style.display = 'none';
+      }
+
+      filtered.forEach(function(p) {
+        grid.appendChild(createCard(p));
+      });
+
+      // Re-observe for scroll reveal
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            obs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      grid.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+    }
+
+    // Filter button logic
+    document.querySelectorAll('.platform-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var platform = this.getAttribute('data-platform');
+
+        if (platform === 'all') {
+          selectedPlatforms = [];
+          document.querySelectorAll('.platform-btn').forEach(function(b) {
+            b.classList.remove('active');
+          });
+          this.classList.add('active');
+        } else {
+          // Remove "Semua" active state
+          document.querySelector('.platform-btn[data-platform="all"]').classList.remove('active');
+
+          // Toggle this platform
+          var idx = selectedPlatforms.indexOf(platform);
+          if (idx !== -1) {
+            selectedPlatforms.splice(idx, 1);
+            this.classList.remove('active');
+          } else {
+            selectedPlatforms.push(platform);
+            this.classList.add('active');
+          }
+
+          // If nothing selected, re-activate "Semua"
+          if (selectedPlatforms.length === 0) {
+            document.querySelector('.platform-btn[data-platform="all"]').classList.add('active');
+          }
+        }
+
+        // Animate transition
+        grid.classList.add('filter-fade');
+        setTimeout(function() {
+          renderProjects();
+          grid.classList.remove('filter-fade');
+        }, 200);
+      });
+    });
+
+    // Initial render
+    renderProjects();
+  </script>
+</body>
+</html>
