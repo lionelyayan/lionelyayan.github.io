@@ -12,21 +12,21 @@ if (!isTouchDevice) {
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
     cursor.style.opacity = '1';
-    ring.style.opacity = '0.6';
-    cursor.style.transform = `translate(${mx - 4}px, ${my - 4}px)`;
+    ring.style.opacity = '0.5';
+    cursor.style.transform = `translate(${mx - 3}px, ${my - 3}px)`;
   });
 
   function animRing() {
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
-    ring.style.transform = `translate(${rx - 18}px, ${ry - 18}px)`;
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    ring.style.transform = `translate(${rx - 14}px, ${ry - 14}px)`;
     requestAnimationFrame(animRing);
   }
   animRing();
 
   document.querySelectorAll('a, button').forEach(el => {
-    el.addEventListener('mouseenter', () => { ring.style.transform += ' scale(1.8)'; ring.style.opacity = '1'; });
-    el.addEventListener('mouseleave', () => { ring.style.opacity = '0.6'; });
+    el.addEventListener('mouseenter', () => { ring.style.opacity = '0.8'; });
+    el.addEventListener('mouseleave', () => { ring.style.opacity = '0.5'; });
   });
 } else {
   cursor.style.display = 'none';
